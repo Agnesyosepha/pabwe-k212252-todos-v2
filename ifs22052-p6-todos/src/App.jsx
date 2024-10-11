@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { Routes, Route, Link, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  BrowserRouter as Router,
+} from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { asyncPreloadProcess } from "./states/isPreload/action";
 import { asyncUnsetAuthLogin } from "./states/authLogin/action";
@@ -12,21 +18,28 @@ import NotFoundPage from "./pages/NotFoundPage";
 import ProfilePage from "./pages/ProfilePage";
 import TodoAddPage from "./pages/TodoAddPage";
 import TodoDetailPage from "./pages/TodoDetailPage";
+import Cover from "./pages/Cover"; // Import Cover component
+
 function App() {
   const { authLogin = null, isPreload = false } = useSelector(
     (states) => states
   );
   const location = useLocation();
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(asyncPreloadProcess());
   }, [dispatch]);
+
   const onAuthSignOut = () => {
     dispatch(asyncUnsetAuthLogin());
   };
+
   if (isPreload) {
     return null;
   }
+
+  // When user is not logged in, show login/register routes
   if (authLogin === null) {
     const activeRegister = location.pathname === "/register" ? "active" : "";
     const activeLogin = location.pathname !== "/register" ? "active" : "";
@@ -42,18 +55,13 @@ function App() {
             </div>
             <ul className="nav nav-pills mb-3">
               <li className="nav-item w-50 text-center">
-                <Link
-                  className={`nav-link 
-${activeLogin} btl`}
-                  to="/"
-                >
+                <Link className={`nav-link ${activeLogin} btl`} to="/">
                   Login
                 </Link>
               </li>
               <li className="nav-item w-50 text-center">
                 <Link
-                  className={`nav-link 
-${activeRegister} btl`}
+                  className={`nav-link ${activeRegister} btl`}
                   to="/register"
                 >
                   Register
@@ -69,6 +77,8 @@ ${activeRegister} btl`}
       </div>
     );
   }
+
+  // When user is logged in, show the app with cover page
   return (
     <>
       <div>
@@ -78,15 +88,19 @@ ${activeRegister} btl`}
         </header>
         <main className="margin-main">
           <Routes>
-            <Route path="/*" element={<NotFoundPage />} />
-            <Route path="/" element={<HomePage />} />
+            {/* Display Cover Page first after login */}
+            <Route path="/" element={<Cover />} />
+            {/* Define the rest of your app's routes */}
+            <Route path="/home" element={<HomePage />} />
             <Route path="/users/me" element={<ProfilePage />} />
             <Route path="/todos/:id" element={<TodoDetailPage />} />
             <Route path="/todos/add" element={<TodoAddPage />} />
+            <Route path="/*" element={<NotFoundPage />} />
           </Routes>
         </main>
       </div>
     </>
   );
 }
+
 export default App;
